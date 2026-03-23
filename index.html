@@ -1,459 +1,693 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Reactify">
-<title>Reactify — Agente de Roteiros</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reactify ⚡ Agente de Roteiros</title>
 <style>
-:root{
-  --bg:#0d1410;--bg2:#111714;--bg3:#172019;--bg4:#1d2b21;
-  --verde:#39ac60;--verde2:#2d9150;--verde3:#4aba6e;--verde-glow:rgba(57,172,96,0.25);
-  --texto:#f0f4f1;--texto2:#a8b8ad;--borda:rgba(57,172,96,0.18);--borda2:rgba(57,172,96,0.08);
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe UI',system-ui,sans-serif}
-:root{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--azul:#4f8ef7;--roxo:#a78bfa;--verde:#22c55e;--laranja:#fb923c;--texto:#e2e8f0;--texto2:#94a3b8;--borda:#2a2a3a}
-html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe UI',system-ui,sans-serif}
+:root{--bg:#0a0a0f;--card:#13131a;--card2:#1a1a24;--purple:#7c3aed;--purple2:#9d5ff3;--pink:#ec4899;--green:#10b981;--yellow:#f59e0b;--text:#e2e8f0;--muted:#64748b;--border:#2a2a3a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.hidden{display:none!important}
 
-/* LOGIN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{background:var(--bg2);border:1px solid var(--borda);border-radius:20px;padding:32px 28px;width:100%;max-width:400px}
-.login-logo{text-align:center;margin-bottom:28px}
-.login-logo h1{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--verde),var(--verde2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.login-logo p{color:var(--texto2);font-size:13px;margin-top:4px}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:11px;font-weight:700;color:var(--texto2);letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--borda);border-radius:10px;padding:12px 14px;color:var(--texto);font-size:14px;outline:none;transition:.2s}
-.form-input:focus{border-color:var(--azul)}
-.btn-primary{width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--azul),var(--roxo));color:#fff;border:none;font-size:15px;font-weight:800;cursor:pointer;transition:.2s}
-.btn-primary:hover{opacity:.9}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.form-toggle{text-align:center;margin-top:16px;font-size:13px;color:var(--texto2)}
-.form-toggle a{color:var(--azul);cursor:pointer;text-decoration:none}
-.form-error{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:8px;padding:10px 13px;font-size:13px;color:#f87171;margin-bottom:14px;display:none}
-.form-error.show{display:block}
+/* AUTH */
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px}
+.logo{text-align:center;font-size:2rem;font-weight:900;margin-bottom:8px}
+.logo span{color:var(--purple2)}
+.subtitle{text-align:center;color:var(--muted);margin-bottom:32px;font-size:.9rem}
+.tab-switch{display:flex;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:24px}
+.tab-btn{flex:1;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:8px;font-weight:600;transition:.2s}
+.tab-btn.active{background:var(--purple);color:#fff}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;outline:none;transition:.2s}
+.field input:focus{border-color:var(--purple2)}
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--purple),var(--purple2));border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;margin-top:8px}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{text-align:center;margin-top:12px;font-size:.9rem;padding:10px;border-radius:8px}
+.msg.erro{background:#7f1d1d;color:#fca5a5}
+.msg.ok{background:#064e3b;color:#6ee7b7}
 
-/* APP */
-.app{display:none;flex-direction:column;height:100vh}
-.app.show{display:flex}
+/* MAIN APP */
+#app{display:none;flex-direction:column;min-height:100vh}
 
-/* HEADER */
-.header{background:var(--bg2);border-bottom:1px solid var(--borda);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.logo{font-size:16px;font-weight:800;background:linear-gradient(135deg,var(--azul),var(--roxo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.user-info{display:flex;align-items:center;gap:8px}
-.user-nome{font-size:12px;color:var(--texto2)}
-.logout-btn{background:none;border:1px solid var(--borda);border-radius:8px;padding:4px 10px;color:var(--texto2);font-size:11px;cursor:pointer}
+/* TOPBAR */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:1.2rem;font-weight:900;flex:1}
+.topbar-logo span{color:var(--purple2)}
+.xp-bar{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:20px;padding:6px 14px;border:1px solid var(--border)}
+.xp-icon{font-size:1.1rem}
+.xp-val{font-weight:700;color:var(--yellow);font-size:.9rem}
+.xp-level{color:var(--muted);font-size:.75rem}
+.user-btn{background:var(--purple);border:none;color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-weight:600;font-size:.85rem}
 
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:16px}
+/* NAV */
+.nav{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;padding:0 12px}
+.nav-item{padding:14px 18px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:.9rem;font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.nav-item.active{color:var(--purple2);border-bottom-color:var(--purple2)}
+.nav-item:hover{color:var(--text)}
 
-/* AGENTE */
-.card{background:var(--bg2);border:1px solid var(--borda);border-radius:14px;padding:18px;margin-bottom:14px}
-.card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.label{font-size:10px;font-weight:700;color:var(--texto2);letter-spacing:.8px;margin-bottom:7px;display:block;text-transform:uppercase}
-.select,.textarea{width:100%;background:var(--bg3);border:1px solid var(--borda);border-radius:10px;padding:10px 13px;color:var(--texto);font-size:13px;outline:none;font-family:inherit}
-.select:focus,.textarea:focus{border-color:var(--roxo)}
-.textarea{resize:vertical;min-height:85px;line-height:1.6;padding-right:44px}
-.section{margin-bottom:16px}
-.tom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:0}
-.tom-btn{padding:10px 8px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--borda);background:var(--bg3);color:var(--texto2);cursor:pointer;text-align:center;line-height:1.4;transition:.15s}
-.tom-btn.active{background:rgba(167,139,250,.2);border-color:var(--roxo);color:var(--roxo)}
-.desc-wrap{position:relative}
-.mic-btn{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:1px solid var(--borda);background:var(--bg3);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:.2s}
-.mic-btn.rec{background:rgba(248,113,113,.2);border-color:#f87171;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
-.perg-box{background:var(--bg3);border:1px solid var(--borda);border-radius:10px;padding:10px 13px;margin-bottom:8px}
-.perg-q{font-size:11px;color:var(--texto2);margin-bottom:4px}
-.perg-a{width:100%;background:none;border:none;color:var(--texto);font-size:13px;outline:none;resize:none;font-family:inherit}
-.gerar-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--roxo),var(--azul));color:#fff;border:none;font-size:15px;font-weight:800;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.gerar-btn:disabled{opacity:.5;cursor:not-allowed}
-.loading{text-align:center;padding:28px;color:var(--texto2);display:none}
-.spin{display:inline-block;width:22px;height:22px;border:2px solid var(--borda);border-top-color:var(--roxo);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+/* PAGES */
+.page{display:none;flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.card-title{font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* AÇÕES DO DIA */
+.acoes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.acao-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.acao-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.acao-card.done{opacity:.5;border-color:var(--green)}
+.acao-icon{font-size:1.8rem;min-width:40px;text-align:center}
+.acao-info{flex:1}
+.acao-nome{font-weight:700;font-size:.95rem;margin-bottom:4px}
+.acao-desc{font-size:.78rem;color:var(--muted)}
+.acao-xp{background:var(--yellow);color:#000;border-radius:8px;padding:3px 8px;font-size:.75rem;font-weight:700}
+
+/* PROGRESSO */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-val{font-size:2rem;font-weight:900;color:var(--purple2)}
+.stat-label{font-size:.78rem;color:var(--muted);margin-top:4px}
+.progress-bar{background:var(--bg);border-radius:99px;height:8px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--purple),var(--purple2))}
+
+/* CATALOGO */
+.catalogo-search{display:flex;gap:10px;margin-bottom:20px}
+.catalogo-search input{flex:1;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.95rem;outline:none}
+.catalogo-search input:focus{border-color:var(--purple2)}
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.video-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s}
+.video-card:hover{transform:translateY(-3px);border-color:var(--purple)}
+.video-thumb{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#1a1a2e}
+.video-thumb-placeholder{width:100%;aspect-ratio:9/16;background:linear-gradient(135deg,var(--card2),var(--bg));display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.video-info{padding:10px 12px}
+.video-nome{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.video-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.7rem;padding:2px 7px;border-radius:6px;font-weight:600}
+.tag.link{background:#1e3a5f;color:#60a5fa}
+.tag.novo{background:#1a3a1a;color:#4ade80}
+.video-actions{display:flex;gap:6px;padding:0 12px 12px}
+.btn-sm{flex:1;padding:7px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;cursor:pointer;font-size:.75rem;font-weight:600;transition:.2s;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px}
+.btn-sm:hover{border-color:var(--purple);color:var(--purple2)}
+.btn-sm.insta{border-color:#e1306c;color:#e1306c}
+.btn-sm.insta:hover{background:#e1306c;color:#fff}
+.btn-sm.roteiro{border-color:var(--purple);color:var(--purple2)}
+.btn-sm.roteiro:hover{background:var(--purple);color:#fff}
+
+/* ROTEIRO */
+.roteiro-form{display:grid;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.form-group textarea,.form-group select,.form-group input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem;outline:none;resize:vertical;transition:.2s}
+.form-group textarea:focus,.form-group select:focus,.form-group input:focus{border-color:var(--purple2)}
+.form-group select option{background:var(--bg)}
+.tons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ton-btn{padding:10px;border:1px solid var(--border);background:var(--bg);color:var(--muted);border-radius:10px;cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s;text-align:center}
+.ton-btn.active{border-color:var(--purple);background:rgba(124,58,237,.2);color:var(--purple2)}
+.resultado{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;white-space:pre-wrap;font-size:.9rem;line-height:1.7;max-height:500px;overflow-y:auto;margin-top:16px}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--purple2);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.resultado{background:var(--bg3);border-radius:12px;padding:14px;font-size:13px;line-height:1.9;color:var(--texto);white-space:pre-wrap;border-left:3px solid var(--roxo);display:none;margin-top:14px}
-.copy-btn{width:100%;padding:11px;border-radius:10px;background:var(--verde);color:#000;border:none;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;display:none;align-items:center;justify-content:center;gap:6px}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
-.badge-mensal{background:rgba(79,142,247,.2);color:var(--azul)}
-.badge-admin{background:rgba(34,197,94,.2);color:var(--verde)}
-.badge-trial{background:rgba(251,146,60,.2);color:var(--laranja)}
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-thumb{background:var(--borda);border-radius:2px}
+.result-actions{display:flex;gap:10px;margin-top:12px}
+.btn-copy{padding:10px 20px;border:1px solid var(--border);background:var(--card2);color:var(--text);border-radius:10px;cursor:pointer;font-weight:600;font-size:.85rem}
+.btn-copy:hover{border-color:var(--purple2)}
 
-@media(min-width:600px){
-  .tom-grid{grid-template-columns:repeat(3,1fr)}
-  .content{max-width:640px;margin:0 auto}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-weight:700;font-size:1.1rem}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;padding:4px}
+.modal-body{padding:24px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--green);border-radius:12px;padding:12px 20px;color:var(--green);font-weight:600;z-index:9999;transform:translateY(100px);transition:.3s;font-size:.9rem}
+.toast.show{transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .tons-grid{grid-template-columns:repeat(2,1fr)}
+  .videos-grid{grid-template-columns:repeat(2,1fr)}
+  .acoes-grid{grid-template-columns:1fr}
 }
-
-/* ===== TEMA VEMCOMOFABIO - VERDE PROFUNDO ===== */
-body { background: radial-gradient(ellipse at top, #172019 0%, #0d1410 60%); }
-
-.login-wrap { background: radial-gradient(ellipse at 50% 0%, rgba(57,172,96,0.12) 0%, transparent 60%); }
-
-.login-box {
-  background: rgba(17,23,20,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(57,172,96,0.2);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(57,172,96,0.1), inset 0 1px 0 rgba(57,172,96,0.1);
-}
-
-.login-logo h1 {
-  background: linear-gradient(135deg, #4aba6e, #39ac60, #2d9150);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
-  filter: drop-shadow(0 0 20px rgba(57,172,96,0.4));
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4aba6e, #2d9150) !important;
-  box-shadow: 0 4px 20px rgba(57,172,96,0.35), 0 0 0 1px rgba(57,172,96,0.2);
-  transition: all .2s;
-}
-.btn-primary:hover { box-shadow: 0 6px 30px rgba(57,172,96,0.5), 0 0 0 1px rgba(57,172,96,0.3); transform: translateY(-1px); }
-
-.form-input {
-  background: rgba(13,20,16,0.8) !important;
-  border: 1px solid rgba(57,172,96,0.15) !important;
-  transition: .2s;
-}
-.form-input:focus { border-color: rgba(57,172,96,0.5) !important; box-shadow: 0 0 0 3px rgba(57,172,96,0.1); }
-
-.header {
-  background: rgba(13,20,16,0.9) !important;
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(57,172,96,0.15) !important;
-  box-shadow: 0 1px 20px rgba(0,0,0,0.3);
-}
-
-.logo {
-  background: linear-gradient(135deg, #4aba6e, #39ac60) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 10px rgba(57,172,96,0.3));
-}
-
-.card, .m2box {
-  background: rgba(17,23,20,0.7) !important;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(57,172,96,0.15) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(57,172,96,0.08);
-}
-
-.tom-btn.active {
-  background: rgba(57,172,96,0.2) !important;
-  border-color: var(--verde) !important;
-  color: var(--verde3) !important;
-  box-shadow: 0 0 15px rgba(57,172,96,0.2);
-}
-.tom-btn:hover { border-color: rgba(57,172,96,0.4) !important; }
-
-.gbtn {
-  background: linear-gradient(135deg, #4aba6e, #2d9150) !important;
-  box-shadow: 0 4px 20px rgba(57,172,96,0.35);
-}
-.gbtn:hover { box-shadow: 0 6px 30px rgba(57,172,96,0.5); }
-
-.mta:focus, .mtextarea:focus { border-color: rgba(57,172,96,0.5) !important; box-shadow: 0 0 0 3px rgba(57,172,96,0.1) !important; }
-
-.resultado { border-left: 3px solid var(--verde) !important; background: rgba(13,20,16,0.8) !important; }
-
-.copy-btn, .copybtn { background: linear-gradient(135deg,#4aba6e,#2d9150) !important; color: #0d1410 !important; }
-
-.search:focus { border-color: rgba(57,172,96,0.4) !important; box-shadow: 0 0 0 2px rgba(57,172,96,0.1); }
-
-.filtro.active { background: var(--verde) !important; border-color: var(--verde) !important; box-shadow: 0 2px 10px rgba(57,172,96,0.3); }
-
-.user-nome { color: var(--texto2); }
-.badge-admin, .badge-mensal { background: rgba(57,172,96,0.2) !important; color: var(--verde3) !important; border: 1px solid rgba(57,172,96,0.3); }
-
-/* Glow sutil no fundo quando logado */
-.app.show { background: radial-gradient(ellipse at top left, rgba(57,172,96,0.06) 0%, transparent 50%); }
-
-::-webkit-scrollbar-thumb { background: rgba(57,172,96,0.2) !important; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(57,172,96,0.4) !important; }
-
 </style>
 </head>
 <body>
-
-<!-- LOGIN / CADASTRO -->
-<div class="login-wrap" id="login-wrap">
-  <div class="login-box">
-    <div class="login-logo">
-      <h1>⚡ Reactify</h1>
-      <p>Agente de Roteiros para Criadores</p>
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="logo">⚡ <span>Reactify</span></div>
+    <div class="subtitle">Agente de Roteiros para Criadores</div>
+    <div class="tab-switch">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('cadastro')">Criar conta</button>
     </div>
-    <div class="form-error" id="form-error"></div>
-
-    <!-- FORM LOGIN -->
     <div id="form-login">
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="login-email" type="email" placeholder="seu@email.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Senha</label>
-        <input class="form-input" id="login-senha" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
-      </div>
-      <button class="btn-primary" id="btn-login" onclick="fazerLogin()">Entrar</button>
-      <div class="form-toggle">
-        Não tem conta? <a onclick="mostrarCadastro()">Criar conta grátis</a>
-      </div>
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="field"><label>Senha</label><input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-primary" onclick="doLogin()" id="btn-login">Entrar</button>
     </div>
-
-    <!-- FORM CADASTRO -->
-    <div id="form-cadastro" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Seu nome</label>
-        <input class="form-input" id="cad-nome" type="text" placeholder="Como você se chama">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="cad-email" type="email" placeholder="seu@email.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Senha</label>
-        <input class="form-input" id="cad-senha" type="password" placeholder="Mínimo 6 caracteres">
-      </div>
-      <button class="btn-primary" id="btn-cad" onclick="fazerCadastro()">Criar minha conta</button>
-      <div class="form-toggle">
-        Já tem conta? <a onclick="mostrarLogin()">Entrar</a>
-      </div>
+    <div id="form-cadastro" class="hidden">
+      <div class="field"><label>Nome</label><input type="text" id="c-nome" placeholder="Seu nome"></div>
+      <div class="field"><label>Email</label><input type="email" id="c-email" placeholder="seu@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="c-senha" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn-primary" onclick="doCadastro()" id="btn-cad">Criar conta grátis</button>
     </div>
+    <div id="auth-msg"></div>
   </div>
 </div>
 
-<!-- APP PRINCIPAL -->
-<div class="app" id="app">
-  <div class="header">
-    <div class="logo">⚡ Reactify</div>
-    <div class="user-info">
-      <span class="user-nome" id="user-nome"></span>
-      <span class="badge badge-mensal" id="user-plano"></span>
-      <button class="logout-btn" onclick="logout()">Sair</button>
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">⚡ <span>Reactify</span></div>
+    <div class="xp-bar">
+      <span class="xp-icon">⭐</span>
+      <div>
+        <div class="xp-val" id="xp-display">0 XP</div>
+        <div class="xp-level" id="level-display">Nível 1</div>
+      </div>
+    </div>
+    <button class="user-btn" onclick="logout()" id="user-name-btn">Sair</button>
+  </div>
+  <div class="nav">
+    <button class="nav-item active" onclick="showPage('catalogo')">🎬 Catálogo</button>
+    <button class="nav-item" onclick="showPage('roteiro')">✍️ Roteiro</button>
+    <button class="nav-item" onclick="showPage('acoes')">🎯 Ações do Dia</button>
+    <button class="nav-item" onclick="showPage('progresso')">🏆 Progresso</button>
+  </div>
+
+  <!-- CATÁLOGO -->
+  <div class="page active" id="page-catalogo">
+    <div class="catalogo-search">
+      <input type="text" id="busca-video" placeholder="🔍 Buscar vídeo..." oninput="filtrarVideos()">
+      <select id="filtro-tipo" onchange="filtrarVideos()" style="padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);outline:none">
+        <option value="todos">Todos</option>
+        <option value="link">Com link Insta</option>
+        <option value="sem-link">Sem link</option>
+      </select>
+    </div>
+    <div id="videos-grid" class="videos-grid">
+      <div class="loading"><div class="spinner"></div><div>Carregando catálogo...</div></div>
     </div>
   </div>
-  <div class="content">
+
+  <!-- ROTEIRO -->
+  <div class="page" id="page-roteiro">
     <div class="card">
-      <div class="card-title">✨ Agente de Roteiro</div>
-
-      <div class="section">
-        <label class="label">🎭 Tom do roteiro</label>
-        <div class="tom-grid">
-          <button class="tom-btn active" data-tom="empolgado" onclick="setTom(this)">😄 Empolgado<br><small>animado, energético</small></button>
-          <button class="tom-btn" data-tom="surpresa" onclick="setTom(this)">😱 Surpresa<br><small>chocante</small></button>
-          <button class="tom-btn" data-tom="indigcao" onclick="setTom(this)">😤 Indignação<br><small>revoltante</small></button>
-          <button class="tom-btn" data-tom="inspirador" onclick="setTom(this)">🔥 Inspirador<br><small>motivacional</small></button>
-          <button class="tom-btn" data-tom="curioso" onclick="setTom(this)">🤔 Curioso<br><small>misterioso</small></button>
-          <button class="tom-btn" data-tom="humor" onclick="setTom(this)">😂 Humor<br><small>divertido</small></button>
+      <div class="card-title">✍️ Gerar Roteiro com IA</div>
+      <div class="roteiro-form">
+        <div class="form-group">
+          <label>📹 Descreva o vídeo</label>
+          <textarea id="r-desc" rows="3" placeholder="Ex: mostro a transformação de uma conta do zero chegando a 100k seguidores em 3 meses usando só reels..."></textarea>
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>⏱️ Duração do vídeo</label>
+            <select id="r-duracao">
+              <option value="15">15 segundos</option>
+              <option value="30">30 segundos</option>
+              <option value="45" selected>45 segundos</option>
+              <option value="60">60 segundos</option>
+              <option value="90">90 segundos</option>
+              <option value="120">2 minutos</option>
+              <option value="180">3 minutos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>🎯 Público-alvo (opcional)</label>
+            <input type="text" id="r-publico" placeholder="Ex: criadores iniciantes">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🎭 Tom do vídeo</label>
+          <div class="tons-grid">
+            <button class="ton-btn active" data-ton="empolgado" onclick="selecionarTom(this)">🔥 Empolgado</button>
+            <button class="ton-btn" data-ton="surpresa" onclick="selecionarTom(this)">😱 Surpresa</button>
+            <button class="ton-btn" data-ton="indigcao" onclick="selecionarTom(this)">😤 Indignação</button>
+            <button class="ton-btn" data-ton="inspirador" onclick="selecionarTom(this)">🚀 Inspirador</button>
+            <button class="ton-btn" data-ton="curioso" onclick="selecionarTom(this)">🤔 Curioso</button>
+            <button class="ton-btn" data-ton="humor" onclick="selecionarTom(this)">😄 Humor</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>💬 Reação que quer causar (opcional)</label>
+          <input type="text" id="r-reacao" placeholder="Ex: fazer a pessoa salvar e compartilhar">
+        </div>
+        <button class="btn-primary" onclick="gerarRoteiro()" id="btn-gerar">⚡ Gerar Roteiro</button>
       </div>
+      <div id="roteiro-resultado"></div>
+    </div>
+  </div>
 
-      <div class="section">
-        <label class="label">🎙️ Descreva o vídeo <span style="color:var(--azul);text-transform:none;font-weight:400">(fale ou escreva)</span></label>
-        <div class="desc-wrap">
-          <textarea class="textarea" id="desc" placeholder="O que acontece no vídeo? Qual a dica que ensina?"></textarea>
-          <button class="mic-btn" id="micbtn" onclick="toggleVoz()" title="Falar">🎤</button>
-        </div>
-        <div id="micstatus" style="font-size:11px;color:#f87171;margin-top:5px;display:none">🔴 Gravando... clique para parar</div>
+  <!-- AÇÕES DO DIA -->
+  <div class="page" id="page-acoes">
+    <div class="card">
+      <div class="card-title">🎯 Ações do Dia <span style="font-size:.8rem;color:var(--muted);font-weight:400" id="acoes-progresso"></span></div>
+      <div class="acoes-grid" id="acoes-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔥 Sequência</div>
+      <div id="streak-display" style="text-align:center;padding:20px">
+        <div style="font-size:3rem;font-weight:900;color:var(--yellow)" id="streak-num">0</div>
+        <div style="color:var(--muted);margin-top:4px">dias seguidos</div>
       </div>
+    </div>
+  </div>
 
-      <div class="section">
-        <label class="label">💡 Melhore o roteiro (opcional)</label>
-        <div class="perg-box">
-          <div class="perg-q">Qual reação o vídeo causa?</div>
-          <textarea class="perg-a" id="p1" rows="1" placeholder="Ex: ficam chocados, dá vontade de tentar..."></textarea>
-        </div>
-        <div class="perg-box">
-          <div class="perg-q">Para qual público?</div>
-          <textarea class="perg-a" id="p2" rows="1" placeholder="Ex: mães, empreendedores, jovens..."></textarea>
-        </div>
+  <!-- PROGRESSO -->
+  <div class="page" id="page-progresso">
+    <div class="card">
+      <div class="card-title">🏆 Seu Progresso</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-val" id="s-xp">0</div><div class="stat-label">XP Total</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-nivel">1</div><div class="stat-label">Nível</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-roteiros">0</div><div class="stat-label">Roteiros Gerados</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-streak">0</div><div class="stat-label">Dias Seguidos</div></div>
       </div>
-
-      <button class="gerar-btn" id="gbtn" onclick="gerarRoteiro()">⚡ Gerar Roteiro Profissional</button>
-      <div class="loading" id="loading"><span class="spin"></span>Agente de copy trabalhando...</div>
-      <div class="resultado" id="resultado"></div>
-      <button class="copy-btn" id="copybtn" onclick="copiar()">📋 Copiar roteiro completo</button>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.85rem">
+          <span>Progresso para próximo nível</span>
+          <span id="xp-prox" style="color:var(--purple2)">0/100 XP</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="xp-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎖️ Conquistas</div>
+      <div id="conquistas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px"></div>
     </div>
   </div>
 </div>
 
+<!-- MODAL ROTEIRO DO VÍDEO -->
+<div class="modal-bg" id="modal-roteiro">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Gerar Roteiro</div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-video-preview" style="margin-bottom:16px"></div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>📝 Contexto adicional (opcional)</label>
+        <textarea id="modal-desc" rows="2" placeholder="Adicione contexto sobre como usar este vídeo..."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="form-group">
+          <label>⏱️ Duração</label>
+          <select id="modal-duracao">
+            <option value="15">15s</option>
+            <option value="30">30s</option>
+            <option value="45" selected>45s</option>
+            <option value="60">60s</option>
+            <option value="90">90s</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>🎭 Tom</label>
+          <select id="modal-tom">
+            <option value="empolgado">🔥 Empolgado</option>
+            <option value="surpresa">😱 Surpresa</option>
+            <option value="indigcao">😤 Indignação</option>
+            <option value="inspirador">🚀 Inspirador</option>
+            <option value="curioso">🤔 Curioso</option>
+            <option value="humor">😄 Humor</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="gerarRoteiroModal()" id="btn-modal-gerar">⚡ Gerar Roteiro</button>
+      <div id="modal-resultado" style="margin-top:16px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 <script>
-const API = window.location.origin;
-let token = localStorage.getItem('rx_token') || '';
+const API = '';
+let TOKEN = localStorage.getItem('r_token') || '';
+let USER = JSON.parse(localStorage.getItem('r_user') || 'null');
 let tomAtivo = 'empolgado';
-let recognition = null, gravando = false;
+let videoAtual = null;
+let todosVideos = [];
 
-// ─── AUTH ────────────────────────────────────────
-
-function mostrarErro(msg) {
-  const el = document.getElementById('form-error');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 4000);
+// XP/GAMIFICAÇÃO
+const NIVEIS = [0,100,250,500,900,1500,2500,4000,6000,10000];
+function getXP(){ return parseInt(localStorage.getItem('r_xp')||'0'); }
+function getNivel(xp){ let n=1; for(let i=1;i<NIVEIS.length;i++){if(xp>=NIVEIS[i])n=i+1;else break;} return Math.min(n,10); }
+function addXP(qtd, motivo){
+  const antes = getXP();
+  const novo = antes + qtd;
+  localStorage.setItem('r_xp', novo);
+  atualizarXPDisplay();
+  showToast(`+${qtd} XP — ${motivo}! 🎉`);
+  // Verifica conquistas
+  verificarConquistas(novo);
+}
+function atualizarXPDisplay(){
+  const xp = getXP();
+  const nivel = getNivel(xp);
+  const xpAtual = xp - NIVEIS[nivel-1];
+  const xpProx = NIVEIS[nivel] ? NIVEIS[nivel] - NIVEIS[nivel-1] : 999;
+  const pct = Math.min(100, (xpAtual/xpProx)*100);
+  document.getElementById('xp-display').textContent = xp+' XP';
+  document.getElementById('level-display').textContent = 'Nível '+nivel;
+  document.getElementById('s-xp').textContent = xp;
+  document.getElementById('s-nivel').textContent = nivel;
+  document.getElementById('xp-prox').textContent = xpAtual+'/'+xpProx+' XP';
+  document.getElementById('xp-fill').style.width = pct+'%';
+}
+function getStreak(){return parseInt(localStorage.getItem('r_streak')||'0');}
+function checkStreak(){
+  const hoje = new Date().toDateString();
+  const ultimo = localStorage.getItem('r_ultimo_dia');
+  const ontem = new Date(Date.now()-86400000).toDateString();
+  if(ultimo===hoje) return;
+  let streak = getStreak();
+  if(ultimo===ontem){ streak++; addXP(20,'Sequência '+streak+' dias'); }
+  else if(ultimo!==hoje){ streak=1; }
+  localStorage.setItem('r_streak', streak);
+  localStorage.setItem('r_ultimo_dia', hoje);
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('s-streak').textContent = streak;
 }
 
-function mostrarCadastro() {
-  document.getElementById('form-login').style.display = 'none';
-  document.getElementById('form-cadastro').style.display = 'block';
-  document.getElementById('form-error').classList.remove('show');
+// AÇÕES DO DIA
+const ACOES_DEF = [
+  {id:'a1',icon:'🎬',nome:'Gerar 1 roteiro',desc:'Use a IA para criar um roteiro hoje',xp:50,tipo:'roteiro'},
+  {id:'a2',icon:'📱',nome:'Postar no Instagram',desc:'Marque como feito após postar',xp:80,tipo:'manual'},
+  {id:'a3',icon:'👀',nome:'Assistir 5 vídeos do catálogo',desc:'Explore o catálogo para se inspirar',xp:30,tipo:'catalogo'},
+  {id:'a4',icon:'📋',nome:'Gerar 3 roteiros',desc:'Crie 3 roteiros diferentes hoje',xp:100,tipo:'roteiro3'},
+  {id:'a5',icon:'🔗',nome:'Remixar um vídeo',desc:'Abra um vídeo do catálogo com link',xp:60,tipo:'manual'},
+  {id:'a6',icon:'💡',nome:'Testar 3 tons diferentes',desc:'Use empolgado, surpresa e humor',xp:40,tipo:'manual'},
+];
+function renderAcoes(){
+  const hoje = new Date().toDateString();
+  const feitas = JSON.parse(localStorage.getItem('r_acoes_'+hoje)||'[]');
+  const grid = document.getElementById('acoes-grid');
+  const total = ACOES_DEF.length, done = feitas.length;
+  document.getElementById('acoes-progresso').textContent = `(${done}/${total} concluídas)`;
+  grid.innerHTML = ACOES_DEF.map(a=>{
+    const isDone = feitas.includes(a.id);
+    return `<div class="acao-card ${isDone?'done':''}" onclick="marcarAcao('${a.id}',${isDone})">
+      <div class="acao-icon">${isDone?'✅':a.icon}</div>
+      <div class="acao-info">
+        <div class="acao-nome">${a.nome}</div>
+        <div class="acao-desc">${a.desc}</div>
+      </div>
+      <div class="acao-xp">+${a.xp} XP</div>
+    </div>`;
+  }).join('');
 }
-
-function mostrarLogin() {
-  document.getElementById('form-cadastro').style.display = 'none';
-  document.getElementById('form-login').style.display = 'block';
-  document.getElementById('form-error').classList.remove('show');
+function marcarAcao(id, isDone){
+  if(isDone) return;
+  const hoje = new Date().toDateString();
+  const feitas = JSON.parse(localStorage.getItem('r_acoes_'+hoje)||'[]');
+  feitas.push(id);
+  localStorage.setItem('r_acoes_'+hoje, JSON.stringify(feitas));
+  const acao = ACOES_DEF.find(a=>a.id===id);
+  addXP(acao.xp, acao.nome);
+  renderAcoes();
+  // Bônus se completou todas
+  if(feitas.length===ACOES_DEF.length) setTimeout(()=>addXP(200,'Todas as ações do dia! 🏆'),500);
 }
-
-async function fazerLogin() {
-  const btn = document.getElementById('btn-login');
-  btn.disabled = true; btn.textContent = 'Entrando...';
-  const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
-  try {
-    const r = await fetch(API + '/api/login', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email, senha})
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.erro || 'Erro ao entrar');
-    salvarSessao(d);
-  } catch(e) {
-    mostrarErro(e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Entrar';
+function incrementarContador(tipo){
+  const hoje = new Date().toDateString();
+  const feitas = JSON.parse(localStorage.getItem('r_acoes_'+hoje)||'[]');
+  if(tipo==='roteiro'){
+    const cont = parseInt(localStorage.getItem('r_rot_hoje_'+hoje)||'0')+1;
+    localStorage.setItem('r_rot_hoje_'+hoje, cont);
+    if(cont===1 && !feitas.includes('a1')){ marcarAcao('a1',false); }
+    if(cont>=3 && !feitas.includes('a4')){ marcarAcao('a4',false); }
+    localStorage.setItem('r_roteiros', parseInt(localStorage.getItem('r_roteiros')||'0')+1);
+    document.getElementById('s-roteiros').textContent = localStorage.getItem('r_roteiros')||'0';
   }
-}
-
-async function fazerCadastro() {
-  const btn = document.getElementById('btn-cad');
-  btn.disabled = true; btn.textContent = 'Criando conta...';
-  const nome  = document.getElementById('cad-nome').value.trim();
-  const email = document.getElementById('cad-email').value.trim();
-  const senha = document.getElementById('cad-senha').value;
-  try {
-    const r = await fetch(API + '/api/cadastro', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({nome, email, senha})
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.erro || 'Erro ao criar conta');
-    salvarSessao(d);
-  } catch(e) {
-    mostrarErro(e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Criar minha conta';
-  }
-}
-
-function salvarSessao(d) {
-  token = d.token;
-  localStorage.setItem('rx_token', token);
-  document.getElementById('user-nome').textContent = d.nome;
-  document.getElementById('user-plano').textContent = d.plano;
-  document.getElementById('user-plano').className = 'badge badge-' + d.plano;
-  document.getElementById('login-wrap').style.display = 'none';
-  document.getElementById('app').classList.add('show');
-}
-
-function logout() {
-  localStorage.removeItem('rx_token');
-  token = '';
-  document.getElementById('app').classList.remove('show');
-  document.getElementById('login-wrap').style.display = 'flex';
-}
-
-// ─── APP ─────────────────────────────────────────
-
-function setTom(btn) {
-  tomAtivo = btn.dataset.tom;
-  document.querySelectorAll('.tom-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function toggleVoz() {
-  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    alert('Use Chrome/Safari para reconhecimento de voz!'); return;
-  }
-  if (gravando) { recognition && recognition.stop(); return; }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = 'pt-BR'; recognition.continuous = true; recognition.interimResults = false;
-  recognition.onresult = e => {
-    let txt = '';
-    for (let i = e.resultIndex; i < e.results.length; i++)
-      if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' ';
-    const ta = document.getElementById('desc');
-    ta.value += (ta.value ? ' ' : '') + txt;
-  };
-  const parar = () => {
-    gravando = false;
-    document.getElementById('micbtn').classList.remove('rec');
-    document.getElementById('micbtn').textContent = '🎤';
-    document.getElementById('micstatus').style.display = 'none';
-  };
-  recognition.onerror = parar; recognition.onend = parar;
-  recognition.start(); gravando = true;
-  document.getElementById('micbtn').classList.add('rec');
-  document.getElementById('micbtn').textContent = '⏹';
-  document.getElementById('micstatus').style.display = 'block';
-}
-
-async function gerarRoteiro() {
-  const desc = document.getElementById('desc').value.trim();
-  if (!desc) { alert('Descreva o que acontece no vídeo!'); return; }
-
-  document.getElementById('gbtn').disabled = true;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('resultado').style.display = 'none';
-  document.getElementById('copybtn').style.display = 'none';
-
-  try {
-    const r = await fetch(API + '/api/gerar-roteiro', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token},
-      body: JSON.stringify({
-        descricao: desc,
-        tom: tomAtivo,
-        reacao: document.getElementById('p1').value.trim(),
-        publico: document.getElementById('p2').value.trim()
-      })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.erro || 'Erro ao gerar');
-    document.getElementById('resultado').textContent = d.roteiro;
-    document.getElementById('resultado').style.display = 'block';
-    document.getElementById('copybtn').style.display = 'flex';
-    document.getElementById('resultado').scrollIntoView({behavior:'smooth'});
-  } catch(e) {
-    document.getElementById('resultado').textContent = '❌ ' + e.message;
-    document.getElementById('resultado').style.display = 'block';
-  } finally {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('gbtn').disabled = false;
-  }
-}
-
-function copiar() {
-  navigator.clipboard.writeText(document.getElementById('resultado').innerText).then(() => {
-    const b = document.getElementById('copybtn');
-    b.textContent = '✅ Copiado!';
-    setTimeout(() => b.textContent = '📋 Copiar roteiro completo', 2000);
-  });
-}
-
-// Verifica se já tem token salvo
-if (token) {
-  fetch(API + '/api/me', {headers:{'Authorization':'Bearer '+token}})
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(d => salvarSessao({...d, token}))
-    .catch(() => { localStorage.removeItem('rx_token'); token = ''; });
 }
 </script>
-</body>
-</html>
+<script>
+// CONQUISTAS
+const CONQUISTAS = [
+  {id:'c1',icon:'🌱',nome:'Primeiro Roteiro',desc:'Gere seu primeiro roteiro',cond:xp=>parseInt(localStorage.getItem('r_roteiros')||0)>=1},
+  {id:'c2',icon:'🔥',nome:'Maratonista',desc:'Gere 10 roteiros',cond:xp=>parseInt(localStorage.getItem('r_roteiros')||0)>=10},
+  {id:'c3',icon:'⭐',nome:'Iniciante',desc:'Alcance 100 XP',cond:xp=>xp>=100},
+  {id:'c4',icon:'💎',nome:'Dedicado',desc:'Alcance 500 XP',cond:xp=>xp>=500},
+  {id:'c5',icon:'👑',nome:'Expert',desc:'Alcance 1000 XP',cond:xp=>xp>=1000},
+  {id:'c6',icon:'📅',nome:'Consistente',desc:'7 dias seguidos',cond:xp=>getStreak()>=7},
+];
+function verificarConquistas(xp){
+  const ganhas = JSON.parse(localStorage.getItem('r_conquistas')||'[]');
+  CONQUISTAS.forEach(c=>{
+    if(!ganhas.includes(c.id) && c.cond(xp)){
+      ganhas.push(c.id);
+      localStorage.setItem('r_conquistas',JSON.stringify(ganhas));
+      setTimeout(()=>showToast(`🎖️ Conquista: ${c.nome}!`),1000);
+    }
+  });
+  renderConquistas();
+}
+function renderConquistas(){
+  const ganhas = JSON.parse(localStorage.getItem('r_conquistas')||'[]');
+  document.getElementById('conquistas-grid').innerHTML = CONQUISTAS.map(c=>{
+    const ok = ganhas.includes(c.id);
+    return `<div style="background:var(--card2);border:1px solid ${ok?'var(--yellow)':'var(--border)'};border-radius:12px;padding:14px;text-align:center;opacity:${ok?1:0.4}">
+      <div style="font-size:2rem">${c.icon}</div>
+      <div style="font-weight:700;font-size:.85rem;margin:6px 0">${c.nome}</div>
+      <div style="font-size:.75rem;color:var(--muted)">${c.desc}</div>
+      ${ok?'<div style="color:var(--yellow);font-size:.75rem;margin-top:6px">✅ Conquistada</div>':''}
+    </div>`;
+  }).join('');
+}
+
+// CATÁLOGO DE VÍDEOS
+async function carregarCatalogo(){
+  try{
+    const r = await fetch(API+'/api/videos', {headers:{Authorization:'Bearer '+TOKEN}});
+    if(r.ok){ todosVideos = await r.json(); }
+  } catch(e){}
+  // Fallback: gera catálogo demo
+  if(!todosVideos.length) todosVideos = gerarVideosDemoLocal();
+  filtrarVideos();
+}
+function gerarVideosDemoLocal(){
+  // Gera cards de demo representando os vídeos do Drive
+  const demos = [];
+  const temas = ['Transformação de conta','Hack de algoritmo','Segredo do viral','Técnica de hook','Estratégia de reels','Como crescer rápido','Erro que mata conta','Melhor horário para postar','Como usar trending','CTA que converte'];
+  for(let i=0;i<890;i++){
+    const temLink = i<4;
+    const links = ['https://www.instagram.com/reel/DVVssk9j41t/','https://www.instagram.com/reel/DV8FmW0EdqS/','https://www.instagram.com/reel/DSsyTKEEoKA/'];
+    demos.push({
+      id:i,nome:`video_${String(i+1).padStart(3,'0')}.mp4`,
+      tema:temas[i%temas.length],
+      temLink:temLink,
+      link:temLink?links[i%links.length]:null,
+      emoji:['🚀','💡','🔥','😱','💰','📈','🎯','⚡','🌟','🎬'][i%10]
+    });
+  }
+  return demos;
+}
+let videosVisiveis = 0;
+function filtrarVideos(){
+  const busca = (document.getElementById('busca-video')?.value||'').toLowerCase();
+  const tipo = document.getElementById('filtro-tipo')?.value||'todos';
+  let filtrados = todosVideos.filter(v=>{
+    const matchBusca = !busca || v.nome.toLowerCase().includes(busca) || v.tema?.toLowerCase().includes(busca);
+    const matchTipo = tipo==='todos' || (tipo==='link'&&v.temLink) || (tipo==='sem-link'&&!v.temLink);
+    return matchBusca && matchTipo;
+  });
+  renderVideos(filtrados);
+}
+function renderVideos(lista){
+  const grid = document.getElementById('videos-grid');
+  const max = Math.min(lista.length, 60);
+  if(!lista.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Nenhum vídeo encontrado</div>'; return; }
+  grid.innerHTML = lista.slice(0,max).map(v=>`
+    <div class="video-card">
+      <div class="video-thumb-placeholder">${v.emoji||'🎬'}</div>
+      <div class="video-info">
+        <div class="video-nome">${v.tema||v.nome}</div>
+        <div class="video-tags">
+          ${v.temLink?'<span class="tag link">🔗 Insta</span>':''}
+          ${v.id<10?'<span class="tag novo">✨ Novo</span>':''}
+        </div>
+      </div>
+      <div class="video-actions">
+        ${v.temLink?`<a class="btn-sm insta" href="${v.link}" target="_blank">📱 Ver</a>`:''}
+        <button class="btn-sm roteiro" onclick="abrirModalRoteiro(${v.id})">✍️ Roteiro</button>
+      </div>
+    </div>`).join('');
+  if(lista.length>max){
+    grid.innerHTML+=`<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:.9rem">Mostrando ${max} de ${lista.length} vídeos. Use a busca para filtrar.</div>`;
+  }
+}
+
+// MODAL ROTEIRO
+function abrirModalRoteiro(id){
+  videoAtual = todosVideos.find(v=>v.id===id);
+  if(!videoAtual) return;
+  document.getElementById('modal-titulo').textContent = videoAtual.tema||videoAtual.nome;
+  document.getElementById('modal-resultado').innerHTML='';
+  document.getElementById('modal-desc').value='';
+  document.getElementById('modal-roteiro').classList.add('open');
+  // Ação do catálogo
+  const hoje = new Date().toDateString();
+  const cont = parseInt(localStorage.getItem('r_cat_'+hoje)||'0')+1;
+  localStorage.setItem('r_cat_'+hoje, cont);
+  const feitas = JSON.parse(localStorage.getItem('r_acoes_'+hoje)||'[]');
+  if(cont>=5 && !feitas.includes('a3')) marcarAcao('a3',false);
+}
+function fecharModal(){document.getElementById('modal-roteiro').classList.remove('open');}
+
+async function gerarRoteiroModal(){
+  const btn = document.getElementById('btn-modal-gerar');
+  const res = document.getElementById('modal-resultado');
+  const desc = document.getElementById('modal-desc').value.trim();
+  const duracao = document.getElementById('modal-duracao').value;
+  const tom = document.getElementById('modal-tom').value;
+  const textoDesc = (videoAtual?.tema||videoAtual?.nome||'') + (desc?' — '+desc:'');
+  res.innerHTML='<div class="loading"><div class="spinner"></div><div>Gerando roteiro...</div></div>';
+  btn.disabled=true;
+  try{
+    const r = await fetch(API+'/api/gerar-roteiro',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:JSON.stringify({descricao:textoDesc,tom,duracao:parseInt(duracao),reacao:'',publico:''})});
+    const d = await r.json();
+    if(d.roteiro){
+      res.innerHTML=`<div class="resultado">${d.roteiro}</div><div class="result-actions"><button class="btn-copy" onclick="copiar(this)">📋 Copiar</button></div>`;
+      addXP(50,'Roteiro gerado');
+      incrementarContador('roteiro');
+    } else { res.innerHTML=`<div class="msg erro">${d.erro||'Erro ao gerar'}</div>`; }
+  }catch(e){ res.innerHTML='<div class="msg erro">Erro de conexão</div>'; }
+  btn.disabled=false;
+}
+</script>
+<script>
+// ROTEIRO PRINCIPAL
+function selecionarTom(btn){
+  document.querySelectorAll('.ton-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  tomAtivo = btn.dataset.ton;
+}
+async function gerarRoteiro(){
+  const btn = document.getElementById('btn-gerar');
+  const res = document.getElementById('roteiro-resultado');
+  const desc = document.getElementById('r-desc').value.trim();
+  if(!desc){ showToast('Descreva o vídeo primeiro! 📝'); return; }
+  const duracao = document.getElementById('r-duracao').value;
+  const publico = document.getElementById('r-publico').value.trim();
+  const reacao = document.getElementById('r-reacao').value.trim();
+  res.innerHTML='<div class="loading"><div class="spinner"></div><div>Gerando roteiro para '+duracao+'s...</div></div>';
+  btn.disabled=true;
+  try{
+    const r = await fetch(API+'/api/gerar-roteiro',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body:JSON.stringify({descricao:desc,tom:tomAtivo,duracao:parseInt(duracao),publico,reacao})});
+    const d = await r.json();
+    if(d.roteiro){
+      res.innerHTML=`<div class="resultado">${d.roteiro}</div><div class="result-actions"><button class="btn-copy" onclick="copiar(this)">📋 Copiar roteiro</button></div>`;
+      addXP(50,'Roteiro gerado');
+      incrementarContador('roteiro');
+    } else { res.innerHTML=`<div class="msg erro">${d.erro||'Erro ao gerar'}</div>`; }
+  }catch(e){ res.innerHTML='<div class="msg erro">Erro de conexão com o servidor</div>'; }
+  btn.disabled=false;
+}
+function copiar(btn){
+  const texto = btn.previousElementSibling?.textContent || btn.closest('.card')?.querySelector('.resultado')?.textContent;
+  if(texto){ navigator.clipboard.writeText(texto).then(()=>{btn.textContent='✅ Copiado!';setTimeout(()=>btn.textContent='📋 Copiar roteiro',2000);}); }
+}
+
+// AUTH
+function switchTab(tab){
+  document.getElementById('form-login').classList.toggle('hidden',tab!=='login');
+  document.getElementById('form-cadastro').classList.toggle('hidden',tab!=='cadastro');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(tab==='login'?i===0:i===1)));
+  document.getElementById('auth-msg').innerHTML='';
+}
+async function doLogin(){
+  const btn=document.getElementById('btn-login');
+  const email=document.getElementById('l-email').value.trim();
+  const senha=document.getElementById('l-senha').value;
+  if(!email||!senha){showAuthMsg('Preencha email e senha','erro');return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{
+    const r=await fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
+    const d=await r.json();
+    if(d.token){salvarSessao(d);iniciarApp();}
+    else showAuthMsg(d.erro||'Email ou senha incorretos','erro');
+  }catch(e){showAuthMsg('Erro de conexão com o servidor','erro');}
+  btn.disabled=false;btn.textContent='Entrar';
+}
+async function doCadastro(){
+  const btn=document.getElementById('btn-cad');
+  const nome=document.getElementById('c-nome').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const senha=document.getElementById('c-senha').value;
+  if(!nome||!email||!senha){showAuthMsg('Preencha todos os campos','erro');return;}
+  if(senha.length<6){showAuthMsg('Senha deve ter mínimo 6 caracteres','erro');return;}
+  btn.disabled=true;btn.textContent='Criando conta...';
+  try{
+    const r=await fetch(API+'/api/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
+    const d=await r.json();
+    if(d.token){salvarSessao(d);iniciarApp();addXP(50,'Bem-vindo ao Reactify');}
+    else showAuthMsg(d.erro||'Erro ao criar conta','erro');
+  }catch(e){showAuthMsg('Erro de conexão','erro');}
+  btn.disabled=false;btn.textContent='Criar conta grátis';
+}
+function salvarSessao(d){
+  TOKEN=d.token; USER={nome:d.nome,plano:d.plano};
+  localStorage.setItem('r_token',TOKEN);
+  localStorage.setItem('r_user',JSON.stringify(USER));
+}
+function showAuthMsg(txt,tipo){
+  document.getElementById('auth-msg').innerHTML=`<div class="msg ${tipo}">${txt}</div>`;
+}
+function logout(){
+  TOKEN='';USER=null;
+  localStorage.removeItem('r_token');localStorage.removeItem('r_user');
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+// NAVEGAÇÃO
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  event?.currentTarget?.classList.add('active');
+  if(id==='acoes'){renderAcoes();}
+  if(id==='progresso'){renderConquistas();}
+  if(id==='catalogo' && !todosVideos.length){carregarCatalogo();}
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// INIT
+function iniciarApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('user-name-btn').textContent=USER?.nome?.split(' ')[0]||'Sair';
+  atualizarXPDisplay();
+  checkStreak();
+  renderConquistas();
+  document.getElementById('s-roteiros').textContent=localStorage.getItem('r_roteiros')||'0';
+  document.getElementById('streak-num').textContent=getStreak();
+  document.getElementById('s-streak').textContent=getStreak();
+  carregarCatalogo();
+}
+// Auto-login
+window.onload=()=>{
+  if(TOKEN && USER){ iniciarApp(); }
+};
+// Fecha modal clicando fora
+document.getElementById('modal-roteiro')?.addEventListener('click',e=>{
+  if(e.target===e.currentTarget)fecharModal();
+});
+</script></body></html>
