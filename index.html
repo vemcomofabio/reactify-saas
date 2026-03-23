@@ -7,7 +7,13 @@
 <meta name="apple-mobile-web-app-title" content="Reactify">
 <title>Reactify — Agente de Roteiros</title>
 <style>
+:root{
+  --bg:#0d1410;--bg2:#111714;--bg3:#172019;--bg4:#1d2b21;
+  --verde:#39ac60;--verde2:#2d9150;--verde3:#4aba6e;--verde-glow:rgba(57,172,96,0.25);
+  --texto:#f0f4f1;--texto2:#a8b8ad;--borda:rgba(57,172,96,0.18);--borda2:rgba(57,172,96,0.08);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe UI',system-ui,sans-serif}
 :root{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--azul:#4f8ef7;--roxo:#a78bfa;--verde:#22c55e;--laranja:#fb923c;--texto:#e2e8f0;--texto2:#94a3b8;--borda:#2a2a3a}
 html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe UI',system-ui,sans-serif}
 
@@ -15,7 +21,7 @@ html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-box{background:var(--bg2);border:1px solid var(--borda);border-radius:20px;padding:32px 28px;width:100%;max-width:400px}
 .login-logo{text-align:center;margin-bottom:28px}
-.login-logo h1{font-size:28px;font-weight:900;background:linear-gradient(135deg,#4f8ef7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-logo h1{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--verde),var(--verde2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .login-logo p{color:var(--texto2);font-size:13px;margin-top:4px}
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:11px;font-weight:700;color:var(--texto2);letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase}
@@ -79,6 +85,96 @@ html,body{height:100%;background:var(--bg);color:var(--texto);font-family:'Segoe
   .tom-grid{grid-template-columns:repeat(3,1fr)}
   .content{max-width:640px;margin:0 auto}
 }
+
+/* ===== TEMA VEMCOMOFABIO - VERDE PROFUNDO ===== */
+body { background: radial-gradient(ellipse at top, #172019 0%, #0d1410 60%); }
+
+.login-wrap { background: radial-gradient(ellipse at 50% 0%, rgba(57,172,96,0.12) 0%, transparent 60%); }
+
+.login-box {
+  background: rgba(17,23,20,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(57,172,96,0.2);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(57,172,96,0.1), inset 0 1px 0 rgba(57,172,96,0.1);
+}
+
+.login-logo h1 {
+  background: linear-gradient(135deg, #4aba6e, #39ac60, #2d9150);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 20px rgba(57,172,96,0.4));
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4aba6e, #2d9150) !important;
+  box-shadow: 0 4px 20px rgba(57,172,96,0.35), 0 0 0 1px rgba(57,172,96,0.2);
+  transition: all .2s;
+}
+.btn-primary:hover { box-shadow: 0 6px 30px rgba(57,172,96,0.5), 0 0 0 1px rgba(57,172,96,0.3); transform: translateY(-1px); }
+
+.form-input {
+  background: rgba(13,20,16,0.8) !important;
+  border: 1px solid rgba(57,172,96,0.15) !important;
+  transition: .2s;
+}
+.form-input:focus { border-color: rgba(57,172,96,0.5) !important; box-shadow: 0 0 0 3px rgba(57,172,96,0.1); }
+
+.header {
+  background: rgba(13,20,16,0.9) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(57,172,96,0.15) !important;
+  box-shadow: 0 1px 20px rgba(0,0,0,0.3);
+}
+
+.logo {
+  background: linear-gradient(135deg, #4aba6e, #39ac60) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 10px rgba(57,172,96,0.3));
+}
+
+.card, .m2box {
+  background: rgba(17,23,20,0.7) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(57,172,96,0.15) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(57,172,96,0.08);
+}
+
+.tom-btn.active {
+  background: rgba(57,172,96,0.2) !important;
+  border-color: var(--verde) !important;
+  color: var(--verde3) !important;
+  box-shadow: 0 0 15px rgba(57,172,96,0.2);
+}
+.tom-btn:hover { border-color: rgba(57,172,96,0.4) !important; }
+
+.gbtn {
+  background: linear-gradient(135deg, #4aba6e, #2d9150) !important;
+  box-shadow: 0 4px 20px rgba(57,172,96,0.35);
+}
+.gbtn:hover { box-shadow: 0 6px 30px rgba(57,172,96,0.5); }
+
+.mta:focus, .mtextarea:focus { border-color: rgba(57,172,96,0.5) !important; box-shadow: 0 0 0 3px rgba(57,172,96,0.1) !important; }
+
+.resultado { border-left: 3px solid var(--verde) !important; background: rgba(13,20,16,0.8) !important; }
+
+.copy-btn, .copybtn { background: linear-gradient(135deg,#4aba6e,#2d9150) !important; color: #0d1410 !important; }
+
+.search:focus { border-color: rgba(57,172,96,0.4) !important; box-shadow: 0 0 0 2px rgba(57,172,96,0.1); }
+
+.filtro.active { background: var(--verde) !important; border-color: var(--verde) !important; box-shadow: 0 2px 10px rgba(57,172,96,0.3); }
+
+.user-nome { color: var(--texto2); }
+.badge-admin, .badge-mensal { background: rgba(57,172,96,0.2) !important; color: var(--verde3) !important; border: 1px solid rgba(57,172,96,0.3); }
+
+/* Glow sutil no fundo quando logado */
+.app.show { background: radial-gradient(ellipse at top left, rgba(57,172,96,0.06) 0%, transparent 50%); }
+
+::-webkit-scrollbar-thumb { background: rgba(57,172,96,0.2) !important; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(57,172,96,0.4) !important; }
+
 </style>
 </head>
 <body>
