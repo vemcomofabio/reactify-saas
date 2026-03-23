@@ -25,9 +25,9 @@ def auth_required(f):
         return f(user, *args, **kwargs)
     return decorated
 
-@app.route("/")
-def index():
-    return send_from_directory(str(SAAS_DIR), "index.html")
+@app.route("/api/ping")
+def ping():
+    return jsonify({"ok": True, "msg": "Reactify API funcionando!"})
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -57,47 +57,6 @@ def cadastro():
 def me(user):
     return jsonify({"nome": user["nome"], "email": user["email"], "plano": user["plano"]})
 
-# ─── WEBHOOK HOTMART ─────────────────────────────────────────────────────────
-# A Hotmart chama essa URL automaticamente quando alguém compra ou pede reembolso
-
-@app.route("/webhook/hotmart", methods=["POST"])
-def webhook_hotmart():
-    # Verifica se o token de segurança bate
-    hottok = request.headers.get("X-Hotmart-Hottok","")
-    if hottok != HOTMART_SECRET:
-        return jsonify({"erro":"Token invalido"}), 401
-
-    data = request.json or {}
-    evento = data.get("event","")
-    comprador = data.get("data",{}).get("buyer",{})
-    nome  = comprador.get("name","")
-    email = comprador.get("email","").lower()
-
-    if not email:
-        return jsonify({"ok": False, "msg": "Email nao encontrado"}), 400
-
-    if evento in ["PURCHASE_APPROVED", "PURCHASE_COMPLETE"]:
-        # Compra aprovada → cria conta automaticamente
-        senha_temp = secrets.token_urlsafe(8)  # senha temporária
-        ok = criar_usuario(nome, email, senha_temp, plano="mensal")
-        if ok:
-            # Envia email com a senha (via Hotmart ou aqui)
-            print(f"[HOTMART] Nova conta: {email} | senha: {senha_temp}")
-        else:
-            # Já tinha conta — reativa
-            print(f"[HOTMART] Conta ja existe: {email}")
-        return jsonify({"ok": True, "evento": evento, "email": email})
-
-    elif evento in ["PURCHASE_REFUNDED", "PURCHASE_CHARGEBACK", "PURCHASE_CANCELLED"]:
-        # Reembolso/cancelamento → desativa conta
-        desativar_usuario(email)
-        print(f"[HOTMART] Conta desativada: {email}")
-        return jsonify({"ok": True, "evento": evento, "email": email})
-
-    return jsonify({"ok": True, "evento": evento, "msg": "Ignorado"})
-
-# ─── GERAR ROTEIRO ────────────────────────────────────────────────────────────
-
 @app.route("/api/gerar-roteiro", methods=["POST"])
 @auth_required
 def gerar_roteiro(user):
@@ -105,49 +64,30 @@ def gerar_roteiro(user):
     desc = d.get("descricao","").strip()
     if not desc:
         return jsonify({"erro":"Descreva o video"}), 400
-
     tons = {
-        "empolgado":"MUITO EMPOLGADO: gesticula, abre olhos, fala rapido e animado",
-        "surpresa":"SURPRESA TOTAL: boca aberta, incredulidade, nao acredito!",
-        "indigcao":"INDIGNAÇAO: que absurdo, como ninguem me contou antes!",
-        "inspirador":"INSPIRADOR: epico, faz o seguidor querer agir agora",
+        "empolgado":"MUITO EMPOLGADO: gesticula, abre olhos, fala rapido",
+        "surpresa":"SURPRESA TOTAL: boca aberta, nao acredito!",
+        "indigcao":"INDIGNAÇAO: que absurdo, como ninguem contou antes!",
+        "inspirador":"INSPIRADOR: epico, faz querer agir agora",
         "curioso":"CURIOSO: tom de descoberta intrigante",
         "humor":"HUMOR e leveza: brincadeiras, auto-ironia"
     }
     tom = tons.get(d.get("tom","empolgado"), "empolgado")
     p1 = d.get("reacao","")
     p2 = d.get("publico","")
-
     linhas = [
-        "Voce e AGENTE DE COPY PROFISSIONAL especializado em roteiros virais para Reels.",
-        "FRAMEWORK AIDA OBRIGATORIO:",
-        "A(0-3s): Hook que PARA o scroll. NUNCA comece com oi.",
-        "I(3-20s): Desenvolve com valor + loop aberto.",
-        "D(20-45s): Conecta com a dor ou sonho do seguidor.",
-        "A(45-60s): CTA natural.",
-        f"TOM DO REACT: {tom}",
-        f"O QUE ACONTECE NO VIDEO: {desc}",
+        "Voce e AGENTE DE COPY PROFISSIONAL para roteiros virais de Reels.",
+        "FRAMEWORK AIDA: A(0-3s) Hook, I(3-20s) Interesse, D(20-45s) Desejo, A(45-60s) CTA.",
+        f"TOM: {tom}",
+        f"VIDEO: {desc}",
     ]
-    if p1: linhas.append(f"REACAO QUE PROVOCA: {p1}")
-    if p2: linhas.append(f"PUBLICO PRINCIPAL: {p2}")
-    linhas += [
-        "ENTREGUE:",
-        "3 OPCOES DE HOOK (0-3s)",
-        "ROTEIRO COMPLETO fala por fala [0-3s][3-15s][15-35s][35-50s][50-60s]",
-        "LEGENDA PRONTA com hashtags",
-        "DICA CAPCUT"
-    ]
-
-    body = json.dumps({
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": 2500,
-        "messages": [{"role":"user","content":"\n".join(linhas)}]
-    }).encode()
-
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages", data=body,
-        headers={"Content-Type":"application/json",
-                 "x-api-key": ANTHROPIC_KEY,
+    if p1: linhas.append(f"REACAO: {p1}")
+    if p2: linhas.append(f"PUBLICO: {p2}")
+    linhas += ["ENTREGUE: 3 HOOKS, ROTEIRO COMPLETO, LEGENDA, DICA CAPCUT"]
+    body = json.dumps({"model":"claude-sonnet-4-20250514","max_tokens":2500,
+                       "messages":[{"role":"user","content":"\n".join(linhas)}]}).encode()
+    req = urllib.request.Request("https://api.anthropic.com/v1/messages", data=body,
+        headers={"Content-Type":"application/json","x-api-key":ANTHROPIC_KEY,
                  "anthropic-version":"2023-06-01"}, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
@@ -155,7 +95,26 @@ def gerar_roteiro(user):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# ─── ADMIN ────────────────────────────────────────────────────────────────────
+@app.route("/webhook/hotmart", methods=["POST"])
+def webhook_hotmart():
+    hottok = request.headers.get("X-Hotmart-Hottok","")
+    if hottok != HOTMART_SECRET:
+        return jsonify({"erro":"Token invalido"}), 401
+    data = request.json or {}
+    evento = data.get("event","")
+    comprador = data.get("data",{}).get("buyer",{})
+    nome = comprador.get("name","")
+    email = comprador.get("email","").lower()
+    if not email:
+        return jsonify({"ok":False}), 400
+    if evento in ["PURCHASE_APPROVED","PURCHASE_COMPLETE"]:
+        senha_temp = secrets.token_urlsafe(8)
+        criar_usuario(nome, email, senha_temp)
+        print(f"[HOTMART] Nova conta: {email} senha: {senha_temp}")
+    elif evento in ["PURCHASE_REFUNDED","PURCHASE_CHARGEBACK","PURCHASE_CANCELLED"]:
+        desativar_usuario(email)
+        print(f"[HOTMART] Desativado: {email}")
+    return jsonify({"ok": True})
 
 @app.route("/api/admin/usuarios")
 @auth_required
@@ -173,11 +132,14 @@ def admin_criar(user):
     ok = criar_usuario(d["nome"], d["email"], d["senha"], d.get("plano","mensal"))
     return jsonify({"ok": ok})
 
+# IMPORTANTE: rota catch-all DEPOIS de todas as rotas /api
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def catch_all(path):
+    return send_from_directory(str(SAAS_DIR), "index.html")
+
 if __name__ == "__main__":
     init_db()
     criar_usuario("Fabio Mendes", ADMIN_EMAIL, ADMIN_SENHA, "admin")
-    try: ip = socket.gethostbyname(socket.gethostname())
-    except: ip = "localhost"
     PORT = int(os.environ.get("PORT", 5000))
-    print(f"Reactify SAAS rodando em http://{ip}:{PORT}")
     app.run(host="0.0.0.0", port=PORT, debug=False)
