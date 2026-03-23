@@ -1,8 +1,11 @@
-import sqlite3, hashlib, os, time, secrets
+import sqlite3, hashlib, os, time, secrets, tempfile
 from pathlib import Path
 
-DB_PATH = os.environ.get("DB_PATH", "/tmp/reactify.db")
+# Funciona tanto na Railway (/tmp) quanto localmente
+_default_db = str(Path(tempfile.gettempdir()) / "reactify.db")
+DB_PATH = os.environ.get("DB_PATH", _default_db)
 DB = Path(DB_PATH)
+DB.parent.mkdir(parents=True, exist_ok=True)
 
 def get_db():
     conn = sqlite3.connect(str(DB))
