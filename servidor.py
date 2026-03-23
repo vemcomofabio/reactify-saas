@@ -1,20 +1,20 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import urllib.request, json, os, secrets
+import urllib.request, json, os, secrets, tempfile
 from pathlib import Path
 from database import (init_db, criar_usuario, verificar_login,
                       criar_token, verificar_token, listar_usuarios, desativar_usuario)
 
 SAAS_DIR = Path(__file__).parent
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-HOTMART_SECRET = os.environ.get("HOTMART_SECRET", "reactify2024")
-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "fabio@reactify.com")
-ADMIN_SENHA = os.environ.get("ADMIN_SENHA", "admin123")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY","")
+HOTMART_SECRET = os.environ.get("HOTMART_SECRET","reactify2024")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL","fabio@reactify.com")
+ADMIN_SENHA = os.environ.get("ADMIN_SENHA","admin123")
 
 app = Flask(__name__, static_folder=str(SAAS_DIR), static_url_path="")
 CORS(app, origins="*")
 
-# CRITICO: init roda aqui para funcionar com Gunicorn E python direto
+# Roda com Gunicorn E python direto
 with app.app_context():
     init_db()
     criar_usuario("Fabio Mendes", ADMIN_EMAIL, ADMIN_SENHA, "admin")
@@ -26,7 +26,7 @@ def auth_required(f):
         token = request.headers.get("Authorization","").replace("Bearer ","")
         user = verificar_token(token)
         if not user:
-            return jsonify({"erro":"Sessao expirada. Faca login novamente."}), 401
+            return jsonify({"erro":"Sessao expirada"}), 401
         return f(user, *args, **kwargs)
     return decorated
 
@@ -54,7 +54,7 @@ def cadastro():
         email = d.get("email","").strip().lower()
         senha = d.get("senha","")
         if not nome or not email or len(senha) < 6:
-            return jsonify({"erro":"Preencha todos os campos (min 6 caracteres)"}), 400
+            return jsonify({"erro":"Preencha todos os campos (min 6 chars)"}), 400
         if not criar_usuario(nome, email, senha):
             return jsonify({"erro":"Email ja cadastrado"}), 409
         user = verificar_login(email, senha)
@@ -76,25 +76,37 @@ def gerar_roteiro(user):
         desc = d.get("descricao","").strip()
         if not desc:
             return jsonify({"erro":"Descreva o video"}), 400
+        duracao = int(d.get("duracao", 45))
+        palavras = int(duracao * 150 / 60)
         tons = {
-            "empolgado":"MUITO EMPOLGADO: gesticula, abre olhos, fala rapido",
-            "surpresa":"SURPRESA TOTAL: boca aberta, nao acredito!",
-            "indigcao":"INDIGNAÇAO: que absurdo, como ninguem contou antes!",
-            "inspirador":"INSPIRADOR: epico, faz querer agir agora",
-            "curioso":"CURIOSO: tom de descoberta intrigante",
-            "humor":"HUMOR e leveza: brincadeiras, auto-ironia"
+            "empolgado":"MUITO EMPOLGADO, gesticula e fala rapido",
+            "surpresa":"TOTAL SURPRESA, boca aberta, inacreditavel",
+            "indigcao":"INDIGNAÇAO, que absurdo ninguem te contou isso",
+            "inspirador":"INSPIRADOR e epico, faz querer agir agora",
+            "curioso":"CURIOSO, tom de descoberta intrigante",
+            "humor":"HUMOR e leveza, com auto-ironia"
         }
         tom = tons.get(d.get("tom","empolgado"), "empolgado")
-        linhas = [
-            "Voce e AGENTE DE COPY PROFISSIONAL para roteiros virais de Reels.",
-            "FRAMEWORK AIDA: A(0-3s) Hook, I(3-20s) Interesse, D(20-45s) Desejo, A(45-60s) CTA.",
-            f"TOM: {tom}", f"VIDEO: {desc}",
-        ]
-        if d.get("reacao"): linhas.append(f"REACAO: {d['reacao']}")
-        if d.get("publico"): linhas.append(f"PUBLICO: {d['publico']}")
-        linhas.append("ENTREGUE: 3 HOOKS, ROTEIRO COMPLETO, LEGENDA, DICA CAPCUT")
-        body = json.dumps({"model":"claude-sonnet-4-20250514","max_tokens":2500,
-                           "messages":[{"role":"user","content":"\n".join(linhas)}]}).encode()
+        prompt = f"""Voce e AGENTE DE COPY PROFISSIONAL para roteiros virais de Reels.
+VIDEO: {duracao} SEGUNDOS. Roteiro de fala com aproximadamente {palavras} palavras.
+TOM: {tom}
+VIDEO: {desc}
+{f"REACAO: {d.get('reacao')}" if d.get('reacao') else ''}
+{f"PUBLICO: {d.get('publico')}" if d.get('publico') else ''}
+
+ENTREGUE EXATAMENTE ISSO:
+**ESTRATEGIA:** (1 linha explicando o angulo)
+**HOOK 1:** (versao A do gancho 0-3s)
+**HOOK 2:** (versao B do gancho 0-3s)  
+**HOOK 3:** (versao C do gancho 0-3s)
+**ROTEIRO ({palavras} palavras):**
+[Cena por cena, exatamente para {duracao}s de video]
+**LEGENDA:**
+[Texto com emojis + hashtags]
+**DICA CAPCUT:**
+[1 dica especifica para este formato de {duracao}s]"""
+        body = json.dumps({"model":"claude-sonnet-4-20250514","max_tokens":2000,
+                           "messages":[{"role":"user","content":prompt}]}).encode()
         req = urllib.request.Request("https://api.anthropic.com/v1/messages", data=body,
             headers={"Content-Type":"application/json","x-api-key":ANTHROPIC_KEY,
                      "anthropic-version":"2023-06-01"}, method="POST")
@@ -113,8 +125,7 @@ def webhook_hotmart():
     comprador = data.get("data",{}).get("buyer",{})
     nome = comprador.get("name","")
     email = comprador.get("email","").lower()
-    if not email:
-        return jsonify({"ok":False}), 400
+    if not email: return jsonify({"ok":False}), 400
     if evento in ["PURCHASE_APPROVED","PURCHASE_COMPLETE"]:
         senha_temp = secrets.token_urlsafe(8)
         criar_usuario(nome, email, senha_temp)
@@ -125,15 +136,13 @@ def webhook_hotmart():
 @app.route("/api/admin/usuarios")
 @auth_required
 def admin_usuarios(user):
-    if user["plano"] != "admin":
-        return jsonify({"erro":"Sem permissao"}), 403
+    if user["plano"] != "admin": return jsonify({"erro":"Sem permissao"}), 403
     return jsonify(listar_usuarios())
 
 @app.route("/api/admin/criar-usuario", methods=["POST"])
 @auth_required
 def admin_criar(user):
-    if user["plano"] != "admin":
-        return jsonify({"erro":"Sem permissao"}), 403
+    if user["plano"] != "admin": return jsonify({"erro":"Sem permissao"}), 403
     d = request.json or {}
     ok = criar_usuario(d["nome"], d["email"], d["senha"], d.get("plano","mensal"))
     return jsonify({"ok": ok})
